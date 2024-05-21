@@ -1,12 +1,4 @@
-import subprocess  # noqa: S404
-
 from environs import Env
-
-# VERSION = (
-#     subprocess.check_output(["git", "describe", "--always"])  # noqa: S603,S607
-#     .strip()
-#     .decode()
-# )
 
 env = Env()
 env.read_env()
@@ -16,15 +8,9 @@ BOT_ID: str = BOT_TOKEN.split(":")[0]
 
 LOGGING_LEVEL: int = env.int("LOGGING_LEVEL", 10)
 
-# PG_HOST: str = env.str("PG_HOST")
-# PG_PORT: int = env.int("PG_PORT")
-# PG_USER: str = env.str("PG_USER")
-# PG_PASSWORD: str = env.str("PG_PASSWORD")
-# PG_DATABASE: str = env.str("PG_DATABASE")
+DB_NAME: str = env.str("DB_NAME")
 
-# FSM_HOST: str = env.str("FSM_HOST")
-# FSM_PORT: int = env.int("FSM_PORT")
-# FSM_PASSWORD: str = env.str("FSM_PASSWORD")
+CHAT_ID: str = env.str("CHAT_ID")
 
 USE_CACHE: bool = env.bool("USE_CACHE", False)
 
