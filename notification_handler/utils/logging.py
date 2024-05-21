@@ -36,6 +36,7 @@ def setup_logger() -> structlog.typing.FilteringBoundLogger:
                 structlog.processors.TimeStamper(fmt=None, utc=True),
                 structlog.processors.dict_tracebacks,
                 structlog.processors.JSONRenderer(serializer=models.base.orjson_dumps),
+                structlog.processors.JSONRenderer(),
             ],
         )
     structlog.configure(
