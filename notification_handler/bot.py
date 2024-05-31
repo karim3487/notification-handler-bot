@@ -10,14 +10,20 @@ from notification_handler import handlers, utils, web_handlers
 from notification_handler.data import config
 from notification_handler.db.db import create_db_and_tables
 from notification_handler.middlewares import StructLoggingMiddleware
+from notification_handler.utils.commands import set_default_commands
 
 
 def setup_handlers(dp: Dispatcher) -> None:
     dp.include_router(handlers.user.prepare_router())
+    dp.include_router(handlers.groups.prepare_router())
 
 
 def setup_middlewares(dp: Dispatcher) -> None:
     dp.update.outer_middleware(StructLoggingMiddleware(logger=dp["aiogram_logger"]))
+
+
+def setup_commands(dp: Dispatcher) -> None:
+    dp.startup.register(set_default_commands)
 
 
 def setup_logging(dp: Dispatcher) -> None:
@@ -101,8 +107,8 @@ async def aiogram_on_shutdown_polling(dispatcher: Dispatcher, bot: Bot) -> None:
 
 
 async def setup_aiohttp_app(  # noqa: RUF029
-    bot: Bot,
-    dp: Dispatcher,
+        bot: Bot,
+        dp: Dispatcher,
 ) -> web.Application:
     scheduler = aiojobs.Scheduler()
     app = web.Application()

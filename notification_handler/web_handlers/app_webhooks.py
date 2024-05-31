@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from notification_handler.data import config
 from notification_handler.data.config import CHAT_ID
 from notification_handler.db.services.notification import NotificationService
+from notification_handler.keyboards.inline.send_to_webhook import YesOrNoKb
 from notification_handler.models.notification import NotificationSchema
 from notification_handler.utils.messages import NEW_TASK, UPDATE_TASK
 
@@ -56,12 +57,30 @@ async def update_notification_and_send_message(req: web.Request, exist_notificat
 
     await NotificationService.update_notification(exist_notification.id, new_notification.model_dump())
     notification = await NotificationService.get_notification_by_id(exist_notification.id)
+    if not notification:
+        await bot.send_message(chat_id=CHAT_ID, text="Не удалось найти notification с таким ID")  # noqa: RUF001
+        return
 
-    msg = await bot.send_message(CHAT_ID, UPDATE_TASK.format(
+    msg_text = UPDATE_TASK.format(
         text=notification.text,
         url=notification.url,
         status=notification.status.value,
-    ), reply_to_message_id=exist_notification.message_id)
+    )
+    if notification.with_keyboard:
+        msg = await bot.send_message(
+            CHAT_ID,
+            msg_text,
+            reply_to_message_id=exist_notification.message_id,
+            reply_markup=YesOrNoKb.yes_or_no(),
+            disable_notification=True
+        )
+    else:
+        msg = await bot.send_message(
+            CHAT_ID,
+            msg_text,
+            disable_notification=True
+        )
+
     notification.message_id = msg.message_id
     await NotificationService.update_notification(notification.id, notification.model_dump())
 
@@ -70,11 +89,26 @@ async def save_notification_and_send_message(req: web.Request, notification: Not
     bot: Bot = req.app["bot"]
 
     await NotificationService.insert_new(notification)
-    msg = await bot.send_message(CHAT_ID, NEW_TASK.format(
+
+    msg_text = NEW_TASK.format(
         text=notification.text,
         url=notification.url,
         status=notification.status.value,
-    ))
+    )
+
+    if notification.with_keyboard:
+        msg = await bot.send_message(
+            CHAT_ID,
+            msg_text,
+            reply_markup=YesOrNoKb.yes_or_no(),
+            disable_notification=True
+        )
+    else:
+        msg = await bot.send_message(
+            CHAT_ID,
+            msg_text,
+            disable_notification=True
+        )
     notification.message_id = msg.message_id
     await NotificationService.update_notification(notification.id, notification.model_dump())
 

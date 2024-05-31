@@ -1,4 +1,3 @@
-
 from pydantic import Field
 
 from notification_handler.db.models.notification import Statuses
@@ -11,5 +10,4 @@ class NotificationSchema(BaseModel):
     text: str
     url: str
     status: Statuses = Field(Statuses.FREE.value)
-
-
+    with_keyboard: bool = Field(False)
